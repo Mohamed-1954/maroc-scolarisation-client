@@ -1,0 +1,522 @@
+Cahier de charge
+Maroc Scolarisation
+Version 1.0
+
+========================================
+Table des matières (Summary - Full Structure Below)
+========================================
+
+1. Introduction
+2. Description générale
+3. Spécifications fonctionnelles détaillées
+4. Exigences non fonctionnelles
+5. Contraintes techniques
+6. Annexes
+
+========================================
+CONTENU DÉTAILLÉ
+========================================
+
+1. Introduction :
+
+1.1. Objet :
+Ce document détaille les spécifications fonctionnelles et techniques pour le développement d'une application web destinée à l'association Maroc Scolarisation. L'objectif est de fournir un outil complet pour gérer les donateurs, les élèves, les transactions financières, les budgets et les dépenses, avec une attention particulière à la sécurité, à la performance et à la facilité d'utilisation.
+
+1.2. Portée :
+La portée du projet englobe :
+- Le développement d'un système d'authentification sécurisé avec gestion des rôles.
+- La gestion complète des donateurs, incluant les préférences de don.
+- La gestion des élèves et le suivi de leurs dépenses individuelles.
+- La gestion des transactions financières, y compris les entrées et les sorties de fonds.
+- La génération de rapports détaillés et de tableaux de bord pour une meilleure prise de décision.
+
+1.3. Définitions, acronymes et abréviations :
+- Donateur: Individu ou organisation qui fait un don à l'association.
+- Parrain: Donateur qui finance spécifiquement un ou plusieurs élèves.
+- Budget général : Fonds non affectés à un élève spécifique.
+- Budget parrain : Fonds dédiés à un élève spécifique par un parrain.
+- Solde : Montant total des fonds disponibles dans le compte bancaire de l'association.
+
+1.4. Références :
+- Normes de développement web.
+- Documentation Firebase.
+- Guides de style de l'association.
+
+1.5. Vue d'ensemble :
+L'application permettra à l'association d'optimiser la gestion de ses ressources financières et humaines, en centralisant les informations et en automatisant certaines tâches administratives.
+
+---
+
+2. Description générale :
+
+2.1. Perspective produit :
+L'application est conçue comme une solution web intégrée, hébergée sur Google Cloud Platform en utilisant Firebase et développée avec TypeScript. Elle remplace les processus manuels existants par une plateforme centralisée et automatisée, améliorant ainsi l'efficacité opérationnelle et la transparence.
+
+2.2. Fonctions principales du produit :
+- Authentification et sécurité : Accès sécurisé pour les employés avec gestion des permissions.
+- Gestion des donateurs : Base de données des donateurs avec historique des dons et préférences.
+- Gestion des élèves : Suivi des élèves soutenus par l'association, y compris leurs besoins spécifiques.
+- Gestion financière : Suivi des entrées et sorties de fonds, gestion des budgets, calcul du solde.
+- Rapports et analyses : Génération de rapports financiers et statistiques pour la prise de décision.
+
+2.3. Caractéristiques des utilisateurs :
+- Administrateurs : Gestion complète de l'application, y compris la gestion des utilisateurs.
+- Comptables : Gestion financière et accès aux rapports détaillés.
+- Gestionnaires : Gestion des donateurs et des élèves, suivi des dépenses.
+
+2.4. Contraintes, hypothèses et dépendances :
+- Contraintes: Respect des réglementations en matière de protection des données.
+- Hypothèses: Les utilisateurs ont une connaissance de base en informatique.
+- Dépendances : L'application dépend de la disponibilité des services Firebase et Google Cloud.
+
+---
+
+3. Spécifications fonctionnelles détaillées :
+
+3.1. Système d'authentification et gestion des rôles :
+
+3.1.1. Authentification des utilisateurs :
+- Technologie : Utilisation de Firebase Authentication pour gérer les sessions utilisateur.
+- Méthodes de connexion :
+  - Connexion via e-mail et mot de passe.
+  - Implémentation de la validation des entrées pour les champs e-mail (format RFC 5322) et mot de passe (minimum 8 caractères, avec au moins une majuscule, une minuscule, un chiffre et un caractère spécial).
+- Fonctionnalités supplémentaires :
+  - Réinitialisation du mot de passe : Envoi d'un lien sécurisé de réinitialisation par e-mail, avec expiration après 24 heures.
+  - Vérification de l'e-mail: Envoi d'un e-mail de confirmation lors de la création du compte.
+- Sécurité :
+  - Protection contre les attaques de type Brute Force en limitant le nombre de tentatives de connexion (ex : 5 tentatives avant un verrouillage temporaire du compte).
+  - Utilisation du protocole HTTPS pour toutes les communications.
+  - Stockage sécurisé des jetons d'authentification (utilisation de Secure HTTP-only Cookies).
+
+3.1.2. Gestion des comptes utilisateurs :
+- Création de comptes :
+  - Les administrateurs peuvent créer de nouveaux comptes via une interface dédiée.
+  - Champs requis : nom, prénom, e-mail, rôle, mot de passe temporaire.
+  - Validation des données : Vérification que l'e-mail n'est pas déjà utilisé, format des champs, etc.
+- Modification des comptes :
+  - Possibilité de mettre à jour les informations utilisateur (sauf e-mail pour éviter les conflits).
+  - Historique des modifications pour audit.
+- Suppression (blocage) des comptes :
+  - Suppression logique (désactivation) plutôt que physique pour conserver l'historique des actions.
+  - Confirmation requise avec double authentification (ex : code envoyé par e-mail).
+
+3.1.3. Gestion des rôles et permissions :
+- Rôles prédéfinis :
+  - Administrateur : Accès complet à toutes les fonctionnalités et données.
+  - Comptable: Accès aux modules financiers, aux rapports, mais pas à la gestion des utilisateurs.
+  - Gestionnaire : Accès à la gestion des donateurs et des élèves, sans accès aux paramètres sensibles.
+- Système d'autorisation basé sur les rôles (RBAC) :
+  - Chaque action ou ressource est associée à des permissions spécifiques.
+  - Contrôles d'accès implémentés côté serveur (Firebase Security Rules) et côté client pour l'interface d'utilisateur.
+- Personnalisation des rôles :
+  - Possibilité pour les administrateurs de créer des rôles personnalisés avec des permissions spécifiques.
+  - Interface pour gérer les permissions associées à chaque rôle.
+
+3.2. Gestion des donateurs :
+
+3.2.1. Ajout de donateurs :
+- Formulaire de création :
+  - Champs requis : nom complet, e-mail, numéro de téléphone, adresse, type de don (général ou parrainage), préférences de communication.
+  - Validation des données :
+    - E-mail: format valide et unicité dans la base de données.
+    - Numéro de téléphone : format international avec validation.
+    - Champs obligatoires non vides.
+- Options supplémentaires :
+  - Possibilité d'ajouter des notes internes (non visibles par le donateur).
+  - Téléchargement de documents liés (ex : accords de don, correspondances).
+- Autorisation :
+  - Seuls les utilisateurs avec les permissions appropriées (Gestionnaire ou Administrateur) peuvent ajouter des donateurs.
+
+3.2.2. Modification des informations des donateurs :
+- Interface de mise à jour :
+  - Accès via la fiche détaillée du donateur.
+  - Validation similaire à la création.
+- Historique des modifications :
+  - Enregistrement des changements avec horodatage et utilisateur ayant effectué la modification.
+- Autorisation :
+  - Accessible aux Gestionnaires et Administrateurs.
+
+3.2.3. Suppression de donateurs :
+- Processus de suppression :
+  - Suppression logique avec mise en statut "Inactif".
+  - Confirmation requise avec message d'avertissement sur les conséquences (ex : perte d'accès aux données associées).
+- Restauration :
+  - Possibilité de réactiver un donateur supprimé.
+- Autorisation :
+  - Seuls les Administrateurs peuvent supprimer des donateurs.
+
+3.2.4. Gestion des préférences de don :
+- Types de dons :
+  - Général : Don sans affectation spécifique.
+  - Parrainage: Don affecté à un ou plusieurs élèves spécifiques.
+- Interface de gestion :
+  - Sélection des élèves à parrainer via une liste filtrable.
+  - Enregistrement des préférences pour les dons futurs.
+- Notifications :
+  - Alertes automatiques si un parrainage nécessite une attention particulière (ex : fin de l'engagement).
+
+3.3. Gestion des élèves :
+
+3.3.1. Ajout d'élèves :
+- Formulaire de création :
+  - Champs requis : nom, prénom, date de naissance, école, classe, informations de contact des parents/tuteurs, besoins spécifiques.
+  - Validation des données :
+    - Date de naissance : vérification que l'élève a moins de 18 ans.
+    - Informations de contact : numéros de téléphone et e-mails valides.
+- Options supplémentaires :
+  - Téléchargement de documents : certificats de scolarité, photos, rapports médicaux, etc.
+  - Attribution directe à un parrain si disponible.
+- Autorisation :
+  - Accessible aux Gestionnaires et Administrateurs.
+
+3.3.2. Modification des informations des élèves :
+- Interface de mise à jour :
+  - Accès via la fiche détaillée de l'élève.
+  - Validation similaire à la création.
+- Historique des modifications :
+  - Enregistrement des changements pour suivi.
+- Autorisation :
+  - Accessible aux Gestionnaires et Administrateurs.
+
+3.3.3. Suppression d'élèves :
+- Processus de suppression :
+  - Suppression logique avec mise en statut "Inactif" ou "Archivé".
+  - Avertissement si l'élève est associé à des parrainages ou des dépenses en cours.
+- Restauration :
+  - Possibilité de réactiver un élève archivé.
+- Autorisation :
+  - Seuls les Administrateurs peuvent supprimer des élèves.
+
+3.3.4. Suivi des dépenses par élève :
+- Enregistrement des dépenses :
+  - Saisie des dépenses spécifiques à un élève : date, montant, catégorie, description, etc.
+  - Validation :
+    - Montant: nombre positif.
+    - Date: ne peut pas être future.
+  - Catégories de dépenses :
+    - Éducation (frais de scolarité, uniformes).
+    - Fourniture scolaire.
+    - Santé (soins médicaux, médicaments).
+    - Autres (avec possibilité d'ajouter des sous-catégories).
+- Visualisation :
+  - Historique des dépenses par élève avec options de filtrage par période, catégorie.
+- Autorisation :
+  - Accessible aux Comptables, gestionnaires et administrateurs.
+
+3.4. Gestion des transactions :
+
+3.4.1. Enregistrements des entrées de fonds :
+- Saisie des dons reçus :
+  - Champs requis : donateur, montant, date de réception, type de don (général/parrainage), méthode de paiement (virement, chèque, espèce).
+  - Validation des données :
+    - Montant: nombre positif.
+    - Donateur: doit exister dans la base de données.
+    - Date: ne peut pas être future.
+  - Association aux budgets:
+    - Attribution automatique ou manuelle aux budgets concernés.
+- Options supplémentaires :
+  - Téléchargement de preuves de paiement (reçus, bordereaux bancaires).
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.4.2. Enregistrements des sorties de fonds :
+- Saisie des dépenses :
+  - Champs requis : bénéficiaire (élève ou catégorie générale), montant, date, catégorie de dépense, description.
+  - Validation similaire aux entrées de fonds.
+- Processus d'approbation :
+  - Possibilité de mettre en place un workflow d'approbation pour les dépenses supérieures à un certain montant.
+  - Notifications aux responsables pour validation.
+- Autorisation :
+  - Saisie par les Comptables et Gestionnaires.
+  - Approbation par les Administrateurs (si nécessaire).
+
+3.4.3. Solde actuel et historique des transactions :
+- Calcul du solde :
+  - Solde = Total des entrées - Total des sorties.
+  - Calculs séparés pour le budget général et le budget parrain.
+- Historique des transactions :
+  - Liste détaillée avec options de filtrage par date, type, montant, donateur, élève.
+  - Exportation des données en formats CSV ou Excel.
+- Visualisation :
+  - Graphiques et tableaux pour une meilleure compréhension.
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.5. Gestion des budgets :
+
+3.5.1. Budget général :
+- Gestion des fonds non affectés :
+  - Suivi des fonds disponibles pour les dépenses générales.
+- Allocation des ressources :
+  - Possibilité de définir des sous-budgets (ex : 30% pour l'éducation, 20% pour la santé).
+- Alertes budgétaires :
+  - Notifications lorsque les dépenses atteignent un certain pourcentage du budget alloué.
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.5.2. Budget parrain :
+- Suivi des fonds par élève :
+  - Visualisation des fonds disponibles pour chaque élève parrainé.
+- Gestion des engagements :
+  - Enregistrement des engagements futurs des parrains.
+- Alertes budgétaires :
+  - Notifications si les fonds disponibles pour un élève sont insuffisants pour couvrir les dépenses prévues.
+- Autorisation :
+  - Accessible aux Comptables, Gestionnaires et Administrateurs.
+
+3.6. Suivi des dépenses :
+
+3.6.1. Catégorisation des dépenses :
+- Système de classification :
+  - Catégories principales : Éducation, Fournitures, Santé, Administration, Autres.
+  - Sous-catégories pour une granularité accrue.
+- Personnalisation :
+  - Possibilité d'ajouter, modifier ou supprimer des catégories et sous-catégories.
+- Autorisation :
+  - Modification des catégories par les Administrateurs.
+
+3.6.2. Détails et justification des dépenses :
+- Documentation :
+  - Téléchargement de justificatifs (factures, reçus).
+  - Champs pour notes supplémentaires ou commentaires.
+- Validation des données :
+  - Vérification de l'existence des justificatifs pour les dépenses supérieures à un certain montant.
+- Autorisation :
+  - Saisie par les Comptables et Gestionnaires.
+  - Consultation par tous les utilisateurs autorisés.
+
+3.6.3. Rapports sur les dépenses :
+- Options de filtrage :
+  - Par période, catégorie, bénéficiaire, montant.
+- Visualisation :
+  - Graphiques en barres, secteurs, lignes pour illustrer les tendances.
+- Exportation:
+  - Possibilité d'exporter les rapports en PDF, Excel.
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.7. Suivi des entrées :
+
+3.7.1. Détails des dons reçus :
+- Historique complet :
+  - Liste des dons avec détails : donateur, montant, date, type, méthode de paiement.
+- Validation des données :
+  - Vérification de la cohérence des montants et des dates.
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.7.2. Fréquence et type de dons :
+- Dons récurrents :
+  - Indication des dons mensuels, trimestriels, annuels.
+  - Suivi des engagements futurs.
+- Dons ponctuels :
+  - Enregistrement unique sans engagement futur.
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.7.3. Rapports sur les entrées :
+- Options de filtrage :
+  - Par période, donateur, type de don, méthode de paiement.
+- Analyses :
+  - Identification des tendances, des pics de dons, des donateurs les plus actifs.
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.8. Gestion du solde :
+
+3.8.1. Calcul automatique du solde :
+- Mécanisme de calcul :
+  - Mise à jour en temps réel après chaque transaction.
+  - Séparation des soldes pour le budget général et le budget parrain.
+- Validation des calculs :
+  - Tests unitaires pour vérifier l'exactitude des calculs.
+- Autorisation :
+  - Visualisation par tous les utilisateurs autorisés.
+
+3.8.2. Alertes sur le solde :
+- Notifications automatiques :
+  - Envoi d'alertes par e-mail ou via l'application lorsque le solde atteint des seuils critiques.
+- Personnalisation des seuils :
+  - Les Administrateurs peuvent définir les seuils d'alerte.
+- Historique des alertes:
+  - Journal des alertes émises pour suivi.
+- Autorisation :
+  - Configuration par les Administrateurs.
+
+3.9. Rapports et tableaux de bord :
+
+3.9.1. Visualisation du solde et des budgets :
+- Tableau de bord principal:
+  - Indicateurs clés: solde total, entrées et sorties du mois, fonds par budget.
+- Personnalisation :
+  - Les utilisateurs peuvent configurer les widgets qu'ils souhaitent afficher.
+- Mises à jour en temps réel :
+  - Données rafraîchies automatiquement sans recharger la page.
+- Autorisation :
+  - Accessible à tous les utilisateurs avec des informations adaptées selon le rôle.
+
+3.9.2. Statistiques sur les dons et les dépenses :
+- Analyses graphiques :
+  - Évolution des dons et des dépenses sur des périodes définies.
+  - Répartition des dépenses par catégorie.
+- Comparaisons :
+  - Comparaison des données entre différentes périodes (ex : mois en cours vs mois précédent).
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.9.3. Rapports personnalisés :
+- Création de rapports :
+  - Interface pour sélectionner les critères (dates, catégories, donateurs, élèves).
+- Sauvegarde des rapports :
+  - Possibilité d'enregistrer des modèles de rapports pour une utilisation future.
+- Partage:
+  - Envoi des rapports par e-mail ou partage au sein de l'application.
+- Autorisation :
+  - Accessible aux Comptables et Administrateurs.
+
+3.10. Notifications et alertes :
+
+3.10.1. Rappels pour les dons récurrents :
+- Système de rappel :
+  - Notifications avant la date prévue du don récurrent.
+- Moyens de communication :
+  - Envoi par e-mail, SMS ou notifications push.
+- Personnalisation :
+  - Les donateurs peuvent choisir leurs préférences de communication.
+- Autorisation :
+  - Configuration par les Gestionnaires et Administrateurs.
+
+3.10.2. Alertes sur les dépenses inhabituelles :
+- Détection automatique :
+  - Système d'alerte pour les dépenses dépassant un certain montant ou hors des catégories habituelles.
+- Validation manuelle :
+  - Les responsables peuvent approuver ou rejeter la dépense après vérification.
+- Historique des alertes :
+  - Journalisation pour audit.
+- Autorisation :
+  - Accessible aux Administrateurs.
+
+---
+
+4. Exigences non fonctionnelles :
+
+4.1. Performances :
+- Temps de réponse :
+  - Opérations critiques (sauvegarde, chargement des données) en moins de 2 secondes.
+- Scalabilité :
+  - Conception pour supporter une croissance des données et des utilisateurs sans dégradation des performances.
+- Tests de charge :
+  - Mise en place de tests pour simuler des charges élevées et identifier les goulots d'étranglement.
+
+4.2. Sécurité :
+- Contrôles d'accès :
+  - Implémentation de Firebase Security Rules pour restreindre l'accès aux données en fonction des rôles.
+- Protection des données :
+  - Chiffrement des données sensibles au repos et en transit.
+- Journalisation :
+  - Enregistrement des actions utilisateur pour audit (création, modification, suppression).
+- Conformité RGPD :
+  - Respect des droits des individus (accès, rectification, suppression des données personnelles).
+
+4.3. Évolutivité :
+- Architecture modulaire :
+  - Utilisation de composants réutilisables.
+- Microservices :
+  - Possibilité de décomposer l'application en microservices pour les fonctionnalités critiques.
+- Mises à jour :
+  - Déploiement continu avec intégration continue (CI/CD).
+
+4.4. Accessibilité :
+- Normes:
+  - Conformité aux normes WCAG 2.1 niveau AA.
+- Interface utilisateur :
+  - Couleurs contrastées, textes alternatifs pour les images, navigation clavier.
+- Tests d'accessibilité :
+  - Utilisation d'outils comme Axe ou Lighthouse pour évaluer l'accessibilité.
+
+4.5. Compatibilité :
+- Navigateurs supportés :
+  - Dernières versions de Chrome, Firefox, Edge, Safari.
+- Responsive design :
+  - Interface adaptative pour mobiles et tablettes.
+- Dépendances :
+  - Gestion des versions des librairies pour éviter les incompatibilités.
+
+---
+
+5. Contraintes techniques :
+
+5.1. Technologies utilisées :
+- Frontend:
+  - Framework: Angular ou React (à déterminer).
+  - Langage: TypeScript.
+  - Gestion de l'état : NgRx (pour Angular) ou Redux (pour React).
+- Backend:
+  - Base de données : Firestore (NoSQL, temps réel).
+  - Fonctions cloud: Firebase Cloud Functions pour les traitements côté serveur.
+  - Stockage: Firebase Storage pour les documents et fichiers.
+- Authentification et Autorisation :
+  - Firebase Authentication avec gestion des rôles personnalisés.
+- Notifications :
+  - Firebase Cloud Messaging pour les notifications push.
+- Outils de développement :
+  - Visual Studio Code, Git pour le contrôle de version.
+  - Intégration continue avec GitHub Actions ou GitLab CI/CD.
+
+5.2. Hébergement sur Google Cloud :
+- Firebase Hosting :
+  - Hébergement sécurisé avec SSL.
+- Scalabilité :
+  - Utilisation des fonctionnalités de scalabilité automatique de Firebase.
+- Sécurité :
+  - Configuration des règles de sécurité pour Firestore et Storage.
+- Surveillance :
+  - Intégration avec Google Cloud Monitoring pour surveiller les performances et les erreurs.
+
+---
+
+6. Annexes :
+
+6.1. Diagrammes UML :
+- Diagrammes de cas d'utilisation :
+  - Identification des acteurs et de leurs interactions avec le système.
+- Diagrammes de classes :
+  - Modélisation des entités (Donateur, Élève, Transaction, Utilisateur) et de leurs relations.
+- Diagrammes de séquence :
+  - Scénarios détaillés pour les principales fonctionnalités (ex: processus de don, gestion des dépenses).
+- Diagrammes d'activité :
+  - Flux de travail pour les processus complexes (ex : validation des dépenses, workflow d'approbation).
+
+6.2. Maquettes de l'interface utilisateur :
+- Pages principales :
+  - Tableau de bord, pages de gestion des donateurs, élèves, transactions.
+- Formulaires :
+  - Création et modification des donateurs, élèves, transactions.
+- Modales et dialogues :
+  - Confirmation de suppression, alertes, notifications.
+
+6.3. Modèle de données :
+- Schéma Firestore :
+  - Collections principales : Users, Donors, Students, Transactions, Budgets.
+  - Structure des documents :
+    - Champs, types de données, indexation pour les requêtes fréquentes.
+- Relations entre collections:
+  - Références et sous-collections pour modéliser les relations (ex : Transactions sous Donors).
+- Optimisation :
+  - Stratégies pour minimiser les coûts de lecture/écriture.
+
+Notes supplémentaires pour les développeurs :
+- Validation des données :
+  - Utiliser des librairies de validation côté client (ex: Yup, Joi) et côté serveur (Firebase Functions).
+- Gestion des erreurs :
+  - Messages d'erreur clairs pour les utilisateurs.
+  - Gestion des exceptions pour éviter les crashs de l'application.
+- Tests:
+  - Écriture de tests unitaires et d'intégration pour les composants critiques.
+  - Tests d'acceptation utilisateur (UAT) avant le déploiement en production.
+- Documentation :
+  - Commentaires dans le code pour faciliter la maintenance.
+  - Guides d'utilisation pour les fonctionnalités complexes.
+- Sécurité avancée :
+  - Surveillance des activités suspectes (ex: tentatives de connexion échouées).
+  - Mise en place de CAPTCHA pour prévenir les bots.
