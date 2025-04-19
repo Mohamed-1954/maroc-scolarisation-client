@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { PasswordInput } from "@/components/password-input/PasswordInput"
+import { PasswordInput } from "@/components/password-input/password-input"
 import { LoadingButton } from '@/components/ui/loading-button'
 import { useSignInWithEmail } from '@/services/auth/mutations'
 

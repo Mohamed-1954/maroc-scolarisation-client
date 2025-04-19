@@ -15,8 +15,6 @@ export const Route = createFileRoute("/(protected)/_mainLayout")({
 function MainLayout() {
   const [user, loading, error] = useAuthState(auth);
 
-  console.log(`MainLayout: Rendering. Loading: ${loading}, User: ${user?.uid || 'null'}, Error: ${error}`);
-
   if (loading) {
     console.log("MainLayout: Auth state loading...");
     return (
@@ -40,7 +38,6 @@ function MainLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  console.log("MainLayout: User authenticated. Rendering protected layout.");
   return (
     <SidebarProvider>
       <DesktopSidebar variant='sidebar' />

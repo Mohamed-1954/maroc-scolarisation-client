@@ -15,7 +15,6 @@ export function useAuthListener() {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    console.log("useAuthListener: Effect running, setting up listener."); 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         try {

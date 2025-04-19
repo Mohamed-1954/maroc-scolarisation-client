@@ -17,8 +17,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { PasswordInput } from "@/components/password-input/PasswordInput";
-import { PasswordStrengthInput } from "@/components/password-input/PasswordStrengthInput";
+import { PasswordInput } from "@/components/password-input/password-input";
+import { PasswordStrengthInput } from "@/components/password-input/password-strength-input";
 import { LoadingButton } from '@/components/ui/loading-button'
 import React from 'react'
 import { useSignUpWithEmail } from '@/services/auth/mutations'
